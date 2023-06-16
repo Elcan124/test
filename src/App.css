@@ -14,7 +14,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #ffd9d9;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -35,4 +35,25 @@
   to {
     transform: rotate(360deg);
   }
+}
+.container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 100vh;
+}
+
+.left-column {
+  flex: 0 0 300px; /* Set the width of the left column */
+  padding: 20px;
+}
+
+.right-column {
+  flex: 1;
+  padding: 20px;
+}
+
+#feature-tree {
+  height: calc(100% - 40px); /* Adjust the height to fit the available space */
+  overflow: auto;
 }
