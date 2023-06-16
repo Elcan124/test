@@ -5,7 +5,7 @@ import "jstree/dist/themes/default/style.css";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import "./TreeComponent.css";
-import Select from "react-select";
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import Histogram from "./Histogram";
 

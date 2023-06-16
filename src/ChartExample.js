@@ -5,6 +5,8 @@ import axios from "axios";
 
 const ChartExample = (props) => {
     const [data, setData] = useState([]);
+    const [selectedNode, setSelectedNode] = useState()
+    const [selectedNodeMax, setselectedNodeMax] = useState()
   
     useEffect(() => {
       retrieveHistogramData();
@@ -41,7 +43,7 @@ const ChartExample = (props) => {
         interval: "none",
       },
       axisPointer: {
-        value: "0",
+        // value: "0",
         lineStyle: {
           color: "black",
           width: 2,
@@ -53,7 +55,13 @@ const ChartExample = (props) => {
         },
         label: {
           show: true,
-          backgroundColor: "#000000",
+          backgroundColor: "red",
+          formatter:(params)=>{
+            let arr = params.value.split("-");
+            setSelectedNode(arr[0]);
+            setselectedNodeMax(arr[1])
+              return params.value;
+          }
         },
       },
       data: data.map((datum) => `${datum.minValue}-${datum.maxValue}`),
@@ -82,7 +90,13 @@ const ChartExample = (props) => {
   return (
     <div className="app-container">
       <ReactEcharts option={option} />
+      <input type="text" name="minVal" value={selectedNode} onChange={(val)=>{setSelectedNode(val)}}/>
+
+      <input type="text" name="maxVal" value={selectedNodeMax}/>
+      
+     <button></button>
     </div>
+
   );
 };
 
