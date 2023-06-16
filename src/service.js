@@ -1,13 +1,12 @@
 import axios from "axios";
-import {baseUrl} from "./config";
-const API_URL = baseUrl+'/';
+import { baseUrl } from "./config";
+
+const API_URL = baseUrl;
+
 class Service {
-    getHistogramData(params){
-        return axios.get(API_URL +"descriptorScalarGraphById/"+params["selected"].text, {});
-    }
-
-
-
-
+  getHistogramData(nodeId) {
+    return axios.get(`${API_URL}/descriptorScalarGraphById/${nodeId}`, {});
+  }
 }
+
 export default new Service();
