@@ -2,15 +2,24 @@ import React, { useEffect, useState } from "react";
 import ReactEcharts from "echarts-for-react";
 import Service from "./service";
 import axios from "axios";
+import { Input } from "@material-ui/core";
+import { Button } from "@mui/material";
+
 
 const ChartExample = ({ nodeId }) => {
   const [data, setData] = useState([]);
-  const [selectedNode, setSelectedNode] = useState();
-  const [selectedNodeMax, setselectedNodeMax] = useState();
+  const [selectedNode, setSelectedNode] = useState()
+    const [selectedNodeMax, setselectedNodeMax] = useState();
+    const [exampleValue,setExampleValue]=useState(selectedNode);
+    const [exampleValueMax,setExampleValueMax]=useState(selectedNodeMax);
 
   useEffect(() => {
     retrieveHistogramData();
   }, [nodeId]); // Fetch data whenever nodeId changes
+  useEffect(() => {
+    setExampleValue(selectedNode);
+    setExampleValueMax(selectedNodeMax)
+  }, [selectedNode,selectedNodeMax]);
 
   const retrieveHistogramData = () => {
     if (nodeId) {
@@ -89,9 +98,12 @@ const ChartExample = ({ nodeId }) => {
   return (
     <div className="app-container">
       <ReactEcharts option={option} />
-      <input type="text" name="minVal" value={selectedNode} onChange={(val)=>{setSelectedNode(val)}}/>
+      <Input type="hidden" name="minVal" value={selectedNode} />
+      <Input type="hidden" name="maxVal" value={selectedNodeMax} />
+      <Input type="text" name="minValExample" value={exampleValue} onChange={(val)=>{setExampleValue(val.target.value)}}/>
+      <Input type="text" name="maxValExample" value={exampleValueMax} onChange={(val)=>{setExampleValueMax(val.target.value)}}/>
 
-      <input type="text" name="maxVal" value={selectedNodeMax}/>
+      <Button onClick={()=>{return null}} variant={"outlined"} color={"success"} >Add</Button>
       
      <button></button>
     </div>
