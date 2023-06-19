@@ -18,6 +18,7 @@ function TreeComponent() {
   const [searched, setSearched] = useState(false);
   const [openHistogram, setOpenHistogram] = useState(false);
   const [payload, setPayload] = useState([]);
+  const [nodeId, setNodeId] = useState(null);
 
 
   useEffect(() => {
@@ -61,9 +62,11 @@ function TreeComponent() {
             },
           })
           .on("select_node.jstree", (e, data) => {
-            setSelectedNodeId(handleNodeId(data.node.id));
+            const nodeId = handleNodeId(data.node.id);
+            setSelectedNodeId(nodeId);
             setNodeText(data.node.text);
             setOpenHistogram(true);
+            setNodeId(nodeId); 
           });
       });
   };
@@ -165,13 +168,12 @@ function TreeComponent() {
   return (
     <div className="container">
       <div className="left-column">
-        <h3>FaceFuture</h3>
-        <div id="feature-tree"></div>
+      <div id="feature-tree"></div>
       </div>
 
       <div className="right-column">
         <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
-          <TabList className="custom-tab-list">
+        <TabList className="custom-tab-list">
             <Tab>Selected Node</Tab>
             <Tab>Person Search</Tab>
           </TabList>
@@ -180,7 +182,12 @@ function TreeComponent() {
             <h3>
               Selected Node: {nodeText} {selectedNodeId}
             </h3>
-            <Histogram open={openHistogram} nodeId={selectedNodeId} text={nodeText} changePayload={changePayload} />
+            <Histogram
+              open={openHistogram}
+              nodeId={selectedNodeId} // Pass the selected nodeId to the Histogram component
+              text={nodeText}
+              changePayload={changePayload}
+            />
             <button id="btn-search" className="btn btn-primary btn-sm mt-3" onClick={handleSearch}>
               Search
             </button>

@@ -3,27 +3,26 @@ import ReactEcharts from "echarts-for-react";
 import Service from "./service";
 import axios from "axios";
 
-const ChartExample = (props) => {
-    const [data, setData] = useState([]);
-    const [selectedNode, setSelectedNode] = useState()
-    const [selectedNodeMax, setselectedNodeMax] = useState()
-  
-    useEffect(() => {
-      retrieveHistogramData();
-    }, []);
-  
-    const retrieveHistogramData = () => {
-      if (props.nodeId) {
-        Service.getHistogramData(props.nodeId)
-          .then((response) => {
-            setData(response.data);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      }
-    };
-  
+const ChartExample = ({ nodeId }) => {
+  const [data, setData] = useState([]);
+  const [selectedNode, setSelectedNode] = useState();
+  const [selectedNodeMax, setselectedNodeMax] = useState();
+
+  useEffect(() => {
+    retrieveHistogramData();
+  }, [nodeId]); // Fetch data whenever nodeId changes
+
+  const retrieveHistogramData = () => {
+    if (nodeId) {
+      Service.getHistogramData(nodeId)
+        .then((response) => {
+          setData(response.data);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+  };
 
   const option = {
     legend: {
