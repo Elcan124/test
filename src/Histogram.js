@@ -68,6 +68,8 @@ function Histogram(props) {
     <div className="App">
       {props.open && (
         <div>
+
+          <h1>SALAALALA</h1>
           <div className={"col-12"}>
             <ChartExample
               selected={selected}

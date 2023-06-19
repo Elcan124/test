@@ -3,27 +3,33 @@ import ReactEcharts from "echarts-for-react";
 import Service from "./service";
 import axios from "axios";
 import { Input } from "@material-ui/core";
-import { Button } from "@mui/material";
+import { Button, List, ListItem, ListItemText } from "@mui/material";
 
-
-const ChartExample = ({ nodeId }) => {
+const ChartExample = (props) => {
   const [data, setData] = useState([]);
-  const [selectedNode, setSelectedNode] = useState()
-    const [selectedNodeMax, setselectedNodeMax] = useState();
-    const [exampleValue,setExampleValue]=useState(selectedNode);
-    const [exampleValueMax,setExampleValueMax]=useState(selectedNodeMax);
+  const [selectedNode, setSelectedNode] = useState();
+  const [selectedNodeMax, setselectedNodeMax] = useState();
+  const [exampleValue, setExampleValue] = useState(selectedNode);
+  const [exampleValueMax, setExampleValueMax] = useState(selectedNodeMax);
+  const [rows, setRows] = useState([]);
+  const [listItems, setListItems] = useState([]);
+  const [nodeId, setnodeId] = useState()
+  const [selected, setSelected] = useState([]);
+  const [searchParams, setSearchParams] = useState([]);
 
   useEffect(() => {
+    setnodeId(props.nodeId);
     retrieveHistogramData();
-  }, [nodeId]); // Fetch data whenever nodeId changes
+  }, [props.nodeId]);
+
   useEffect(() => {
     setExampleValue(selectedNode);
-    setExampleValueMax(selectedNodeMax)
-  }, [selectedNode,selectedNodeMax]);
+    setExampleValueMax(selectedNodeMax);
+  }, [selectedNode, selectedNodeMax]);
 
   const retrieveHistogramData = () => {
-    if (nodeId) {
-      Service.getHistogramData(nodeId)
+    if (props.nodeId) { // Use the local state nodeId
+      Service.getHistogramData(props.nodeId)
         .then((response) => {
           setData(response.data);
         })
@@ -33,6 +39,37 @@ const ChartExample = ({ nodeId }) => {
     }
   };
 
+  const handleAddRow = () => {
+    if (exampleValue && exampleValueMax && nodeId) {
+      const newRow = {
+        descriptorId: nodeId,
+        minValue: exampleValue,
+        maxValue: exampleValueMax,
+      };
+
+      const updatedListItems = [...listItems, newRow];
+      setListItems(updatedListItems);
+      props.changePayload(updatedListItems);
+
+      console.log("Added Item:", newRow);
+      console.log("Updated List Data:", updatedListItems);
+      console.log(exampleValue);
+    } else {
+      alert("Min value and max value cannot be empty.");
+    }
+  };
+
+  const handleDeleteRow = (index) => {
+    const updatedListItems = [...listItems];
+    updatedListItems.splice(index, 1);
+    setListItems(updatedListItems);
+    props.changePayload(updatedListItems);
+
+    console.log("Deleted Item:", listItems[index]);
+    console.log("Updated List Data:", updatedListItems);
+  };
+
+  
   const option = {
     legend: {
       top: "bottom",
@@ -51,7 +88,6 @@ const ChartExample = ({ nodeId }) => {
         interval: "none",
       },
       axisPointer: {
-        // value: "0",
         lineStyle: {
           color: "black",
           width: 2,
@@ -64,12 +100,12 @@ const ChartExample = ({ nodeId }) => {
         label: {
           show: true,
           backgroundColor: "red",
-          formatter:(params)=>{
+          formatter: (params) => {
             let arr = params.value.split("-");
             setSelectedNode(arr[0]);
-            setselectedNodeMax(arr[1])
-              return params.value;
-          }
+            setselectedNodeMax(arr[1]);
+            return params.value;
+          },
         },
       },
       data: data.map((datum) => `${datum.minValue}-${datum.maxValue}`),
@@ -98,16 +134,51 @@ const ChartExample = ({ nodeId }) => {
   return (
     <div className="app-container">
       <ReactEcharts option={option} />
-      <Input type="hidden" name="minVal" value={selectedNode} />
-      <Input type="hidden" name="maxVal" value={selectedNodeMax} />
-      <Input type="text" name="minValExample" value={exampleValue} onChange={(val)=>{setExampleValue(val.target.value)}}/>
-      <Input type="text" name="maxValExample" value={exampleValueMax} onChange={(val)=>{setExampleValueMax(val.target.value)}}/>
-
-      <Button onClick={()=>{return null}} variant={"outlined"} color={"success"} >Add</Button>
-      
-     <button></button>
+     <Input type="hidden" name="descriptorId" value={props.nodeId} />
+<Input type="hidden" name="minValue" value={selectedNode} />
+<Input type="hidden" name="maxValue" value={selectedNodeMax} />
+      <Input
+        type="text"
+        name="descriptorIdInput"
+        value={nodeId}
+       
+      />
+      <Input
+  type="text"
+  name="minValExample"
+  value={exampleValue}
+  onChange={(val) => {
+    setExampleValue(val.target.value);
+  }}
+/>
+<Input
+  type="text"
+  name="maxValExample"
+  value={exampleValueMax}
+  onChange={(val) => {
+    setExampleValueMax(val.target.value);
+  }}
+/>
+<List>
+        {listItems.map((item, index) => (
+          <ListItem key={index}>
+            <ListItemText
+              primary={`Descriptor ID: ${item.descriptorId}, Min Value: ${item.minValue}, Max Value: ${item.maxValue}`}
+            />
+            <Button
+              onClick={() => handleDeleteRow(index)}
+              variant="outlined"
+              color="error"
+            >
+              Delete
+            </Button>
+          </ListItem>
+        ))}
+      </List>
+      <Button onClick={handleAddRow} variant="outlined" color="success">
+        Add
+      </Button>
     </div>
-
   );
 };
 

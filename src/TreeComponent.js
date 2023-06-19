@@ -8,6 +8,7 @@ import "./TreeComponent.css";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import Histogram from "./Histogram";
+import ChartExample from "./ChartExample";
 
 function TreeComponent() {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -20,7 +21,6 @@ function TreeComponent() {
   const [payload, setPayload] = useState([]);
   const [nodeId, setNodeId] = useState(null);
 
-
   useEffect(() => {
     initializeTree();
 
@@ -29,9 +29,9 @@ function TreeComponent() {
     };
   }, []);
 
-  const  changePayload=(searchParams)=>{
+  const changePayload = (searchParams) => {
     setPayload(searchParams);
-  }
+  };
 
   function handleNodeId(value) {
     const arr = value.split("_");
@@ -66,7 +66,7 @@ function TreeComponent() {
             setSelectedNodeId(nodeId);
             setNodeText(data.node.text);
             setOpenHistogram(true);
-            setNodeId(nodeId); 
+            setNodeId(nodeId);
           });
       });
   };
@@ -77,13 +77,15 @@ function TreeComponent() {
 
   const handleSearch = () => {
     const filteredRules = [];
-    const selectedNodes = $("#feature-tree").jstree(true).get_selected("full", true);
+    const selectedNodes = $("#feature-tree")
+      .jstree(true)
+      .get_selected("full", true);
     for (let i = 0; i < selectedNodes.length; i++) {
       const arr = selectedNodes[i].id.split("_");
       const lastElement = arr[arr.length - 1];
       filteredRules.push(lastElement);
     }
-    let query=payload;
+    let query = payload;
     // let payload = [
     //   {
     //     descriptorId: 223,
@@ -123,7 +125,6 @@ function TreeComponent() {
 
   const handleTabSelect = (index) => {
     if (index === selectedTab && index === 1) {
-      
       return;
     }
     setSelectedTab(index);
@@ -168,12 +169,12 @@ function TreeComponent() {
   return (
     <div className="container">
       <div className="left-column">
-      <div id="feature-tree"></div>
+        <div id="feature-tree"></div>
       </div>
 
       <div className="right-column">
         <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
-        <TabList className="custom-tab-list">
+          <TabList className="custom-tab-list">
             <Tab>Selected Node</Tab>
             <Tab>Person Search</Tab>
           </TabList>
@@ -182,13 +183,23 @@ function TreeComponent() {
             <h3>
               Selected Node: {nodeText} {selectedNodeId}
             </h3>
-            <Histogram
-              open={openHistogram}
-              nodeId={selectedNodeId} // Pass the selected nodeId to the Histogram component
+            {/* <ChartExample
+              
+              nodeId={selectedNodeId} 
               text={nodeText}
               changePayload={changePayload}
+            /> */}
+            <ChartExample
+              selected={selectedNodeId}
+              changePayload={changePayload}
+              nodeId={selectedNodeId}
+              text={nodeText}
             />
-            <button id="btn-search" className="btn btn-primary btn-sm mt-3" onClick={handleSearch}>
+            <button
+              id="btn-search"
+              className="btn btn-primary btn-sm mt-3"
+              onClick={handleSearch}
+            >
               Search
             </button>
           </TabPanel>
