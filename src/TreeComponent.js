@@ -5,11 +5,15 @@ import "jstree/dist/themes/default/style.css";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import "./TreeComponent.css";
-
+import Breadcrumbs from "@mui/material/Breadcrumbs";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Histogram from "./Histogram";
 import ChartExample from "./ChartExample";
-
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+import TouchAppIcon from "@mui/icons-material/TouchApp";
+import { Pagination } from "@mui/lab";
+import { Select, MenuItem } from "@mui/material";
 function TreeComponent() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [nodeText, setNodeText] = useState(null);
@@ -20,6 +24,13 @@ function TreeComponent() {
   const [openHistogram, setOpenHistogram] = useState(false);
   const [payload, setPayload] = useState([]);
   const [nodeId, setNodeId] = useState(null);
+  const [breadcrumbs, setBreadcrumbs] = useState([]);
+  const [listItems, setListItems] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [personsPerPage, setPersonsPerPage] = useState(10);
+  const personsPerPageOptions = [10, 25, 50, 100];
+  const [bread, setBread] = useState([])
 
   useEffect(() => {
     initializeTree();
@@ -35,18 +46,31 @@ function TreeComponent() {
 
   function handleNodeId(value) {
     const arr = value.split("_");
-    let a = arr.slice(-1)[0];
-    return a;
+    return arr;
   }
 
+  const handleAddRow = (newRow) => {
+    const updatedListItems = [...listItems, newRow];
+    setListItems(updatedListItems);
+    changePayload(updatedListItems);
+  };
+
+  const handleDeleteRow = (index) => {
+    const updatedListItems = [...listItems];
+    updatedListItems.splice(index, 1);
+    setListItems(updatedListItems);
+    changePayload(updatedListItems);
+  };
   const initializeTree = () => {
     fetch("http://localhost:8080/allFeatureDescriptorWithStructure")
       .then((response) => response.json())
       .then((data) => {
+        const filteredData = data.filter((node) => node.text !== "Future");
+
         $("#feature-tree")
           .jstree({
             core: {
-              data: data,
+              data: filteredData,
               check_callback: true,
               themes: {
                 name: "default",
@@ -62,11 +86,21 @@ function TreeComponent() {
             },
           })
           .on("select_node.jstree", (e, data) => {
-            const nodeId = handleNodeId(data.node.id);
-            setSelectedNodeId(nodeId);
+            const nodeIds = handleNodeId(data.node.id);
+            setSelectedNodeId(nodeIds[nodeIds.length - 1]);
             setNodeText(data.node.text);
+            
             setOpenHistogram(true);
-            setNodeId(nodeId);
+            setNodeId(nodeIds[nodeIds.length - 1]);
+
+            const parentTexts = data.node.parents
+              .map((parentId) => {
+                const parentNode = data.instance.get_node(parentId);
+                return parentNode.text;
+              })
+              .reverse();
+            console.log("salam salam salam");
+            setBreadcrumbs([...parentTexts, data.node.text]);
           });
       });
   };
@@ -85,26 +119,13 @@ function TreeComponent() {
       const lastElement = arr[arr.length - 1];
       filteredRules.push(lastElement);
     }
+
     let query = payload;
-    // let payload = [
-    //   {
-    //     descriptorId: 223,
-    //     minValue: 0.0,
-    //     maxValue: 12.12,
-    //   },
-    // ];
 
-    // const requestBody = {
-    //   draw: 100,
-    //   columns: [],
-    //   order: [],
-    //   start: 0,
-    //   length: 10,
-    //   search: null,
-    //   extra: payload,
-    // };
+    const limitCount = 1000;
+    const offsetCount = (page - 1) * personsPerPage;
 
-    fetch("http://localhost:8080/findPersons/10/10", {
+    fetch(`http://localhost:8080/findPersons/${limitCount}/${offsetCount}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,10 +134,17 @@ function TreeComponent() {
     })
       .then((response) => response.json())
       .then((data) => {
-        //alert(JSON.stringify(data));
         setUsers(data);
         setSearched(true);
         setSelectedTab(1);
+
+        const totalCount = data.length > 0 ? data[0].totalCount : 0;
+        const totalPages = Math.ceil(totalCount / limitCount);
+        setTotalPages(totalPages);
+
+        if (page > totalPages) {
+          setPage(1);
+        }
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -145,9 +173,10 @@ function TreeComponent() {
   };
 
   const renderTableRows = () => {
+    const startIndex = (page - 1) * personsPerPage;
     return (
       <tbody>
-        {users.map((user) => {
+        {users.slice(startIndex, startIndex + personsPerPage).map((user) => {
           const imageUrl = `http://localhost:8080/getImageByApplicationNumberId/${user.applicationNumber}`;
 
           return (
@@ -175,25 +204,33 @@ function TreeComponent() {
       <div className="right-column">
         <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
           <TabList className="custom-tab-list">
-            <Tab>Selected Node</Tab>
-            <Tab>Person Search</Tab>
+            <Tab>
+              <span>Selected Node</span>
+              <TouchAppIcon />
+            </Tab>
+            <Tab>
+              <span>Person Search</span>
+              <PersonSearchIcon />
+            </Tab>
           </TabList>
 
           <TabPanel>
-            <h3>
-              Selected Node: {nodeText} {selectedNodeId}
-            </h3>
-            {/* <ChartExample
-              
-              nodeId={selectedNodeId} 
-              text={nodeText}
-              changePayload={changePayload}
-            /> */}
+            <Breadcrumbs
+              separator={<ArrowForwardIosIcon fontSize="small" />}
+              aria-label="breadcrumb"
+            >
+              {breadcrumbs.map((breadcrumb, index) => (
+                <span key={index}>{breadcrumb}</span>
+              ))}
+            </Breadcrumbs>
             <ChartExample
               selected={selectedNodeId}
-              changePayload={changePayload}
+              changePayload={handleAddRow}
               nodeId={selectedNodeId}
               text={nodeText}
+              breadcrumbs={breadcrumbs}
+              listItems={listItems}
+              deleteRow={handleDeleteRow}
             />
             <button
               id="btn-search"
@@ -216,6 +253,42 @@ function TreeComponent() {
                   ) : (
                     <p>No search results yet.</p>
                   )}
+
+                  <div>
+                    <span>Persons per page:</span>
+                    <Select
+                      value={personsPerPage}
+                      onChange={(e) =>
+                        setPersonsPerPage(parseInt(e.target.value))
+                      }
+                      sx={{
+                        borderRadius: "29px",
+                        minWidth: 95,
+                        marginLeft: "10px",
+                        paddingTop: "2px",
+                        paddingBottom: "2px",
+                        paddingLeft: "8px",
+                        paddingRight: "8px",
+                        width: "100px",
+                        height: "31px",
+                      }}
+                    >
+                      {personsPerPageOptions.map((option) => (
+                        <MenuItem key={option} value={option}>
+                          {option}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={(event, value) => setPage(value)}
+                    color="primary"
+                    size="small"
+                    className="pagination"
+                  />
                 </div>
               </div>
             </div>
@@ -225,4 +298,5 @@ function TreeComponent() {
     </div>
   );
 }
+
 export default TreeComponent;

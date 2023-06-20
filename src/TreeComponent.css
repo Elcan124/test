@@ -92,3 +92,19 @@
 
     margin-left: 80px;
   }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    padding: "4.5px 10px";
+  }
+  .pagination-options {
+    margin-bottom: 10px;
+    padding: "4.5px 10px";
+  }
+  
+  .pagination-options select {
+    padding: 5px;
+    font-size: 14px;
+  
+  }

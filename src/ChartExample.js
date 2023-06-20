@@ -5,6 +5,7 @@ import axios from "axios";
 import { Input } from "@material-ui/core";
 import { Button, List, ListItem, ListItemText } from "@mui/material";
 
+
 const ChartExample = (props) => {
   const [data, setData] = useState([]);
   const [selectedNode, setSelectedNode] = useState();
@@ -16,11 +17,14 @@ const ChartExample = (props) => {
   const [nodeId, setnodeId] = useState()
   const [selected, setSelected] = useState([]);
   const [searchParams, setSearchParams] = useState([]);
+  const [breadcrumb, setBreadcrumb] = useState([]);
 
   useEffect(() => {
     setnodeId(props.nodeId);
+    setBreadcrumb(props.breadcrumbs)
+    setListItems(props.listItems);
     retrieveHistogramData();
-  }, [props.nodeId]);
+  },[props.nodeId, props.breadcrumbs]);
 
   useEffect(() => {
     setExampleValue(selectedNode);
@@ -28,7 +32,7 @@ const ChartExample = (props) => {
   }, [selectedNode, selectedNodeMax]);
 
   const retrieveHistogramData = () => {
-    if (props.nodeId) { // Use the local state nodeId
+    if (props.nodeId) { 
       Service.getHistogramData(props.nodeId)
         .then((response) => {
           setData(response.data);
@@ -47,26 +51,17 @@ const ChartExample = (props) => {
         maxValue: exampleValueMax,
       };
 
-      const updatedListItems = [...listItems, newRow];
-      setListItems(updatedListItems);
-      props.changePayload(updatedListItems);
+      props.changePayload(newRow);
 
-      console.log("Added Item:", newRow);
-      console.log("Updated List Data:", updatedListItems);
-      console.log(exampleValue);
+    
     } else {
       alert("Min value and max value cannot be empty.");
     }
   };
 
   const handleDeleteRow = (index) => {
-    const updatedListItems = [...listItems];
-    updatedListItems.splice(index, 1);
-    setListItems(updatedListItems);
-    props.changePayload(updatedListItems);
+    props.deleteRow(index);
 
-    console.log("Deleted Item:", listItems[index]);
-    console.log("Updated List Data:", updatedListItems);
   };
 
   
@@ -99,7 +94,7 @@ const ChartExample = (props) => {
         },
         label: {
           show: true,
-          backgroundColor: "red",
+          backgroundColor: "#62BFFF",
           formatter: (params) => {
             let arr = params.value.split("-");
             setSelectedNode(arr[0]);
@@ -123,9 +118,25 @@ const ChartExample = (props) => {
       {
         name: "Count",
         data: data.map((datum) => datum.count),
+        
         type: "bar",
         itemStyle: {
-          color: (params) => (params.data > 200 ? "green" : "blue"),
+          color: (params) => {
+            const value = params.data;
+            if (value >= 0 && value <= 300) {
+              return "#79B6FF"; // göy
+            } else if (value > 300 && value <= 900) {
+              return "#ADF611"; // yaşıl
+            } else if (value > 900 && value <= 1500) {
+              return "#FF923D"; // portağal
+            } else if (value > 1500 && value <= 3000) {
+              return "#FC3535"; // qırmızı
+            } else if (value > 3000 && value <= 6000) {
+              return "#D33BF5"; // benovseyi
+            } else {
+              return "#AD1E01"; // qırmızı +boz
+            }
+          },
         },
       },
     ],
@@ -137,12 +148,7 @@ const ChartExample = (props) => {
      <Input type="hidden" name="descriptorId" value={props.nodeId} />
 <Input type="hidden" name="minValue" value={selectedNode} />
 <Input type="hidden" name="maxValue" value={selectedNodeMax} />
-      <Input
-        type="text"
-        name="descriptorIdInput"
-        value={nodeId}
-       
-      />
+
       <Input
   type="text"
   name="minValExample"
@@ -160,10 +166,10 @@ const ChartExample = (props) => {
   }}
 />
 <List>
-        {listItems.map((item, index) => (
+        {props.listItems.map((item, index) => (
           <ListItem key={index}>
             <ListItemText
-              primary={`Descriptor ID: ${item.descriptorId}, Min Value: ${item.minValue}, Max Value: ${item.maxValue}`}
+              primary={`${breadcrumb.join(" > ")} > Min Value: ${item.minValue} - Max Value: ${item.maxValue}`}
             />
             <Button
               onClick={() => handleDeleteRow(index)}

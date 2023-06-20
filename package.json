@@ -28,6 +28,8 @@
     "jquery": "^3.7.0",
     "jstree": "^3.3.15",
     "react": "^18.2.0",
+    "react-bootstrap-table-next": "^4.0.3",
+    "react-bootstrap-table2-editor": "^1.4.0",
     "react-checkbox-group": "^5.0.2",
     "react-dom": "^18.2.0",
     "react-google-charts": "^4.0.0",
