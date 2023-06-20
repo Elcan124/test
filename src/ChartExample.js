@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import ReactEcharts from "echarts-for-react";
 import Service from "./service";
 import axios from "axios";
-import { Input } from "@material-ui/core";
-import { Button, List, ListItem, ListItemText } from "@mui/material";
+import {Input ,  Button, List, ListItem, ListItemText } from "@mui/material";
 
 
 const ChartExample = (props) => {

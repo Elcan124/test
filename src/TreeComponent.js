@@ -89,7 +89,7 @@ function TreeComponent() {
             const nodeIds = handleNodeId(data.node.id);
             setSelectedNodeId(nodeIds[nodeIds.length - 1]);
             setNodeText(data.node.text);
-            
+
             setOpenHistogram(true);
             setNodeId(nodeIds[nodeIds.length - 1]);
 
