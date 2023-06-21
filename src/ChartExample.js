@@ -2,8 +2,21 @@ import React, { useEffect, useState } from "react";
 import ReactEcharts from "echarts-for-react";
 import Service from "./service";
 import axios from "axios";
-import {Input ,  Button, List, ListItem, ListItemText } from "@mui/material";
 
+import {
+  Input,
+  Button,
+  TableHead,
+  List,
+  ListItem,
+  ListItemText,
+  TableContainer,
+  Table,
+  TableRow,
+  TableCell,
+  TableBody,
+} from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const ChartExample = (props) => {
   const [data, setData] = useState([]);
@@ -13,17 +26,19 @@ const ChartExample = (props) => {
   const [exampleValueMax, setExampleValueMax] = useState(selectedNodeMax);
   const [rows, setRows] = useState([]);
   const [listItems, setListItems] = useState([]);
-  const [nodeId, setnodeId] = useState()
+  const [nodeId, setnodeId] = useState();
   const [selected, setSelected] = useState([]);
   const [searchParams, setSearchParams] = useState([]);
   const [breadcrumb, setBreadcrumb] = useState([]);
 
+
   useEffect(() => {
     setnodeId(props.nodeId);
-    setBreadcrumb(props.breadcrumbs)
+    setBreadcrumb([ props.breadcrumbs]);
+
     setListItems(props.listItems);
     retrieveHistogramData();
-  },[props.nodeId, props.breadcrumbs]);
+  }, [props.nodeId, props.breadcrumbs]);
 
   useEffect(() => {
     setExampleValue(selectedNode);
@@ -31,7 +46,7 @@ const ChartExample = (props) => {
   }, [selectedNode, selectedNodeMax]);
 
   const retrieveHistogramData = () => {
-    if (props.nodeId) { 
+    if (props.nodeId) {
       Service.getHistogramData(props.nodeId)
         .then((response) => {
           setData(response.data);
@@ -41,18 +56,22 @@ const ChartExample = (props) => {
         });
     }
   };
+  
+   
+  const formatBreadcrumb = (breadcrumb) => {
+    return breadcrumb.join(" > ");
+  };
 
   const handleAddRow = () => {
     if (exampleValue && exampleValueMax && nodeId) {
       const newRow = {
+        breadcrumbItem: breadcrumb,
         descriptorId: nodeId,
         minValue: exampleValue,
         maxValue: exampleValueMax,
       };
 
       props.changePayload(newRow);
-
-    
     } else {
       alert("Min value and max value cannot be empty.");
     }
@@ -60,10 +79,8 @@ const ChartExample = (props) => {
 
   const handleDeleteRow = (index) => {
     props.deleteRow(index);
-
   };
 
-  
   const option = {
     legend: {
       top: "bottom",
@@ -117,7 +134,7 @@ const ChartExample = (props) => {
       {
         name: "Count",
         data: data.map((datum) => datum.count),
-        
+
         type: "bar",
         itemStyle: {
           color: (params) => {
@@ -144,42 +161,60 @@ const ChartExample = (props) => {
   return (
     <div className="app-container">
       <ReactEcharts option={option} />
-     <Input type="hidden" name="descriptorId" value={props.nodeId} />
-<Input type="hidden" name="minValue" value={selectedNode} />
-<Input type="hidden" name="maxValue" value={selectedNodeMax} />
+      <Input type="hidden" name="descriptorId" value={props.nodeId} />
+      <Input type="hidden" name="minValue" value={selectedNode} />
+      <Input type="hidden" name="maxValue" value={selectedNodeMax} />
 
       <Input
-  type="text"
-  name="minValExample"
-  value={exampleValue}
-  onChange={(val) => {
-    setExampleValue(val.target.value);
-  }}
-/>
-<Input
-  type="text"
-  name="maxValExample"
-  value={exampleValueMax}
-  onChange={(val) => {
-    setExampleValueMax(val.target.value);
-  }}
-/>
-<List>
-        {props.listItems.map((item, index) => (
-          <ListItem key={index}>
-            <ListItemText
-              primary={`${breadcrumb.join(" > ")} > Min Value: ${item.minValue} - Max Value: ${item.maxValue}`}
-            />
+        type="text"
+        name="minValExample"
+        value={exampleValue}
+        onChange={(val) => {
+          setExampleValue(val.target.value);
+        }}
+      />
+      <Input
+        type="text"
+        name="maxValExample"
+        value={exampleValueMax}
+        onChange={(val) => {
+          setExampleValueMax(val.target.value);
+        }}
+      />
+    <TableContainer>
+  <Table>
+    <TableHead>
+      <TableRow>
+        <TableCell>Path</TableCell>
+        <TableCell align="right">Min Value</TableCell>
+        <TableCell align="right">Max Value</TableCell>
+        <TableCell align="right"></TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {props.listItems.map((item, index) => (
+        <TableRow key={index}>
+          <TableCell>
+            {formatBreadcrumb(item.breadcrumbItem).replace(/,/g, " > ")}
+          </TableCell>
+          <TableCell align="right">{item.minValue}</TableCell>
+          <TableCell align="right">{item.maxValue}</TableCell>
+          <TableCell align="right">
             <Button
               onClick={() => handleDeleteRow(index)}
               variant="outlined"
               color="error"
+              startIcon={<ClearIcon />}
             >
-              Delete
+              DELETE
             </Button>
-          </ListItem>
-        ))}
-      </List>
+          </TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+</TableContainer>
+
       <Button onClick={handleAddRow} variant="outlined" color="success">
         Add
       </Button>

@@ -96,11 +96,10 @@
     display: flex;
     justify-content: center;
     margin-top: 10px;
-    padding: "4.5px 10px";
   }
   .pagination-options {
     margin-bottom: 10px;
-    padding: "4.5px 10px";
+    
   }
   
   .pagination-options select {
@@ -108,3 +107,47 @@
     font-size: 14px;
   
   }
+  .tree-component-container {
+    background: linear-gradient(to bottom, #f3f3f3, #ffffff);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+   
+  }
+  .custom-tab-list-item {
+    display: inline-block;
+    padding: 8px 30px;
+    cursor: pointer;
+    background-color: #f3f3f3;
+    border: 1px solid #be9cff;
+    border-bottom: none;
+    border-radius: 43px 5px 0 0;
+    margin-right: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+    width: 150px;
+    text-align: center;
+  }
+  
+  .custom-tab-list-item:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .custom-tab-list-item:focus {
+    outline: none;
+  }
+  
+  .custom-tab-list-item.react-tabs__tab--selected {
+    background-color: #dbdbff;
+    border-bottom-color: #ffffff;
+    color: #000000;
+  }
+  .top-left-image {
+    width: 85px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 9999;
+  }
+  
+  

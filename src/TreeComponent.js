@@ -13,7 +13,11 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import { Pagination } from "@mui/lab";
-import { Select, MenuItem } from "@mui/material";
+import { TableContainer ,  Select, MenuItem, CircularProgress, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import Stack from '@mui/material/Stack';
+import faceIcon from './images/face.png';
+
+
 function TreeComponent() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [nodeText, setNodeText] = useState(null);
@@ -21,6 +25,7 @@ function TreeComponent() {
   const [users, setUsers] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
   const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [openHistogram, setOpenHistogram] = useState(false);
   const [payload, setPayload] = useState([]);
   const [nodeId, setNodeId] = useState(null);
@@ -124,7 +129,7 @@ function TreeComponent() {
 
     const limitCount = 1000;
     const offsetCount = (page - 1) * personsPerPage;
-
+    setLoading(true);
     fetch(`http://localhost:8080/findPersons/${limitCount}/${offsetCount}`, {
       method: "POST",
       headers: {
@@ -145,9 +150,11 @@ function TreeComponent() {
         if (page > totalPages) {
           setPage(1);
         }
+        setLoading(false); 
       })
       .catch((error) => {
         console.error("Error:", error);
+        setLoading(false);
       });
   };
 
@@ -160,61 +167,67 @@ function TreeComponent() {
 
   const renderTableHeader = () => {
     return (
-      <thead>
-        <tr>
-          <th>PIN</th>
-          <th>App Number</th>
-          <th>Birth Date</th>
-          <th>Count</th>
-          <th>Photo</th>
-        </tr>
-      </thead>
+      <TableHead>
+        <TableRow>
+          <TableCell>PIN</TableCell>
+          <TableCell>App Number</TableCell>
+          <TableCell>Birth Date</TableCell>
+          <TableCell>Count</TableCell>
+          <TableCell>Photo</TableCell>
+        </TableRow>
+      </TableHead>
     );
   };
 
   const renderTableRows = () => {
     const startIndex = (page - 1) * personsPerPage;
     return (
-      <tbody>
+      <TableBody>
         {users.slice(startIndex, startIndex + personsPerPage).map((user) => {
           const imageUrl = `http://localhost:8080/getImageByApplicationNumberId/${user.applicationNumber}`;
-
+  
           return (
-            <tr key={user.pin}>
-              <td>{user.pin}</td>
-              <td>{user.applicationNumber}</td>
-              <td>{user.birthDate}</td>
-              <td>{user.countrecord}</td>
-              <td className="image">
+            <TableRow key={user.pin}>
+              <TableCell>{user.pin}</TableCell>
+              <TableCell>{user.applicationNumber}</TableCell>
+              <TableCell>{user.birthDate}</TableCell>
+              <TableCell>{user.countrecord}</TableCell>
+              <TableCell className="image">
                 <img src={imageUrl} alt="Person" className="img-thumbnail" />
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           );
         })}
-      </tbody>
+      </TableBody>
     );
   };
 
   return (
+    
     <div className="container">
       <div className="left-column">
         <div id="feature-tree"></div>
       </div>
-
+      
+{/* <div style={{ position: "absolute", top: 0, left: 0 }}>
+  <img src={faceIcon} alt="Face Icon" />
+</div> */}
       <div className="right-column">
         <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
-          <TabList className="custom-tab-list">
-            <Tab>
-              <span>Selected Node</span>
-              <TouchAppIcon />
-            </Tab>
-            <Tab>
-              <span>Person Search</span>
-              <PersonSearchIcon />
-            </Tab>
-          </TabList>
+        <TabList className="custom-tab-list">
+  <Tab className="custom-tab-list-item">
+    <span>Selected Node</span>
+    <TouchAppIcon />
+  </Tab>
+  <Tab className="custom-tab-list-item">
+    <span>Person Search</span>
+    <PersonSearchIcon />
+  </Tab>
+</TabList>
 
           <TabPanel>
+          {selectedNodeId !==null && (
+            <>
             <Breadcrumbs
               separator={<ArrowForwardIosIcon fontSize="small" />}
               aria-label="breadcrumb"
@@ -232,13 +245,25 @@ function TreeComponent() {
               listItems={listItems}
               deleteRow={handleDeleteRow}
             />
-            <button
-              id="btn-search"
-              className="btn btn-primary btn-sm mt-3"
-              onClick={handleSearch}
-            >
-              Search
-            </button>
+              <button
+                  id="btn-search"
+                  className="btn btn-primary btn-sm mt-3"
+                  onClick={handleSearch}
+                >
+                  {loading ? ( 
+                    <div className="d-flex align-items-center">
+                      <span>Loading...</span>
+                      <Stack sx={{ color: 'black' }} >
+      
+                      <CircularProgress color="inherit"  size={20} className="ms-2" />
+                      </Stack>
+                    </div>
+                  ) : (
+                    <span>Search</span>
+                  )}
+                </button>
+            </>
+          )}
           </TabPanel>
 
           <TabPanel>
@@ -246,10 +271,12 @@ function TreeComponent() {
               <div className="image-div">
                 <div className="col-sm-9">
                   {searched ? (
-                    <table className="table">
-                      {renderTableHeader()}
-                      {renderTableRows()}
-                    </table>
+                <TableContainer>
+                <Table>
+                  {renderTableHeader()}
+                  {renderTableRows()}
+                </Table>
+              </TableContainer>
                   ) : (
                     <p>No search results yet.</p>
                   )}
@@ -296,6 +323,7 @@ function TreeComponent() {
         </Tabs>
       </div>
     </div>
+    
   );
 }
 
