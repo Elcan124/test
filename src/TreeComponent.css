@@ -121,11 +121,11 @@
     background-color: #f3f3f3;
     border: 1px solid #be9cff;
     border-bottom: none;
-    border-radius: 43px 5px 0 0;
+    border-radius: 5px 5px 0 0;
     margin-right: 5px;
     font-weight: bold;
     transition: background-color 0.3s, color 0.3s;
-    width: 150px;
+    width: 200px;
     text-align: center;
   }
   
