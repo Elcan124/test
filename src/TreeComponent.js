@@ -130,7 +130,17 @@ function TreeComponent() {
               .reverse();
             console.log("salam salam salam");
             setBreadcrumbs([...parentTexts, data.node.text]);
-          });
+          }).on('ready.jstree', function (e, data) {
+          var leaf = null;
+          var getFirstLeaf = function (id) {
+            var node = data.instance;
+
+            node.open_node(id); //Triggers select_node event
+            node.disable_node(id);
+            node.disable_checkbox(id);
+          };
+          getFirstLeaf('0'); // Start from the root node id
+        });
       });
   };
 
