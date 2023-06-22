@@ -180,7 +180,14 @@ const ChartExample = (props) => {
         onChange={(val) => {
           setExampleValueMax(val.target.value);
         }}
+        
       />
+    
+      <Button onClick={handleAddRow} variant="outlined" color="success" size="small">
+        Add
+      </Button>
+     
+       
     <TableContainer>
   <Table>
     <TableHead>
@@ -204,6 +211,7 @@ const ChartExample = (props) => {
               onClick={() => handleDeleteRow(index)}
               variant="outlined"
               color="error"
+              size="small"
               startIcon={<ClearIcon />}
             >
               DELETE
@@ -215,9 +223,7 @@ const ChartExample = (props) => {
   </Table>
 </TableContainer>
 
-      <Button onClick={handleAddRow} variant="outlined" color="success">
-        Add
-      </Button>
+     
     </div>
   );
 };

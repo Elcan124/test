@@ -12,10 +12,25 @@ import ChartExample from "./ChartExample";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
-import { Pagination } from "@mui/lab";
-import { TableContainer ,  Select, MenuItem, CircularProgress, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import Stack from '@mui/material/Stack';
-import faceIcon from './images/face.png';
+
+import {
+  TableContainer,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from "@mui/material";
+import Stack from "@mui/material/Stack";
+import faceIcon from "./images/face.png";
+import { Pagination, Button } from "@mui/material";
+import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
+import PaginationItem from "@mui/material/PaginationItem";
+import Fancybox  from "./Fancybox";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 
 function TreeComponent() {
@@ -31,11 +46,12 @@ function TreeComponent() {
   const [nodeId, setNodeId] = useState(null);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
   const [listItems, setListItems] = useState([]);
+
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [personsPerPage, setPersonsPerPage] = useState(10);
   const personsPerPageOptions = [10, 25, 50, 100];
-  const [bread, setBread] = useState([])
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     initializeTree();
@@ -44,6 +60,13 @@ function TreeComponent() {
       destroyTree();
     };
   }, []);
+  useEffect(() => {
+    if (!initialLoad) {
+      fetchSearchResults();
+    } else {
+      setInitialLoad(false);
+    }
+  }, [page, personsPerPage]);
 
   const changePayload = (searchParams) => {
     setPayload(searchParams);
@@ -92,6 +115,7 @@ function TreeComponent() {
           })
           .on("select_node.jstree", (e, data) => {
             const nodeIds = handleNodeId(data.node.id);
+            setSelectedTab(0);
             setSelectedNodeId(nodeIds[nodeIds.length - 1]);
             setNodeText(data.node.text);
 
@@ -113,44 +137,24 @@ function TreeComponent() {
   const destroyTree = () => {
     $("#feature-tree").jstree("destroy");
   };
-
-  const handleSearch = () => {
-    const filteredRules = [];
-    const selectedNodes = $("#feature-tree")
-      .jstree(true)
-      .get_selected("full", true);
-    for (let i = 0; i < selectedNodes.length; i++) {
-      const arr = selectedNodes[i].id.split("_");
-      const lastElement = arr[arr.length - 1];
-      filteredRules.push(lastElement);
-    }
-
-    let query = payload;
-
-    const limitCount = 1000;
-    const offsetCount = (page - 1) * personsPerPage;
+  const fetchSearchResults = () => {
+    const offset = (page - 1) * personsPerPage;
     setLoading(true);
-    fetch(`http://localhost:8080/findPersons/${limitCount}/${offsetCount}`, {
+    fetch(`http://localhost:8080/findPersons/${personsPerPage}/${offset}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(query),
+      body: JSON.stringify(payload),
     })
       .then((response) => response.json())
       .then((data) => {
-        setUsers(data);
+        const count = data.totalCount;
+        setUsers(data.searchedPersons);
         setSearched(true);
         setSelectedTab(1);
-
-        const totalCount = data.length > 0 ? data[0].totalCount : 0;
-        const totalPages = Math.ceil(totalCount / limitCount);
-        setTotalPages(totalPages);
-
-        if (page > totalPages) {
-          setPage(1);
-        }
-        setLoading(false); 
+        setTotalPages(Math.ceil(count / personsPerPage));
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -158,11 +162,19 @@ function TreeComponent() {
       });
   };
 
+  const handleSearch = () => {
+    fetchSearchResults();
+  };
+
   const handleTabSelect = (index) => {
     if (index === selectedTab && index === 1) {
       return;
     }
     setSelectedTab(index);
+  };
+
+  const handlePageChange = (value) => {
+    setPage(value);
   };
 
   const renderTableHeader = () => {
@@ -179,143 +191,179 @@ function TreeComponent() {
     );
   };
 
-  const renderTableRows = () => {
-    const startIndex = (page - 1) * personsPerPage;
-    return (
-      <TableBody>
-        {users.slice(startIndex, startIndex + personsPerPage).map((user) => {
-          const imageUrl = `http://localhost:8080/getImageByApplicationNumberId/${user.applicationNumber}`;
-  
-          return (
-            <TableRow key={user.pin}>
-              <TableCell>{user.pin}</TableCell>
-              <TableCell>{user.applicationNumber}</TableCell>
-              <TableCell>{user.birthDate}</TableCell>
-              <TableCell>{user.countrecord}</TableCell>
-              <TableCell className="image">
-                <img src={imageUrl} alt="Person" className="img-thumbnail" />
-              </TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    );
-  };
-
   return (
-    
     <div className="container">
       <div className="left-column">
         <div id="feature-tree"></div>
       </div>
-      
-{/* <div style={{ position: "absolute", top: 0, left: 0 }}>
+
+      {/* <div style={{ position: "absolute", top: 0, left: 0 }}>
   <img src={faceIcon} alt="Face Icon" />
 </div> */}
       <div className="right-column">
         <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
-        <TabList className="custom-tab-list">
-  <Tab className="custom-tab-list-item">
-    <span>Selected Node</span>
-    <TouchAppIcon />
-  </Tab>
-  <Tab className="custom-tab-list-item">
-    <span>Person Search</span>
-    <PersonSearchIcon />
-  </Tab>
-</TabList>
+          <TabList className="custom-tab-list">
+            <Tab className="custom-tab-list-item">
+              <span>Selected Node</span>
+              <TouchAppIcon />
+            </Tab>
+            <Tab className="custom-tab-list-item">
+              <span>Person Search</span>
+              <PersonSearchIcon />
+            </Tab>
+          </TabList>
 
           <TabPanel>
-          {selectedNodeId !==null && (
-            <>
-            <Breadcrumbs
-              separator={<ArrowForwardIosIcon fontSize="small" />}
-              aria-label="breadcrumb"
-            >
-              {breadcrumbs.map((breadcrumb, index) => (
-                <span key={index}>{breadcrumb}</span>
-              ))}
-            </Breadcrumbs>
-            <ChartExample
-              selected={selectedNodeId}
-              changePayload={handleAddRow}
-              nodeId={selectedNodeId}
-              text={nodeText}
-              breadcrumbs={breadcrumbs}
-              listItems={listItems}
-              deleteRow={handleDeleteRow}
-            />
-              <button
-                  id="btn-search"
-                  className="btn btn-primary btn-sm mt-3"
-                  onClick={handleSearch}
+            {selectedNodeId !== null && (
+              <>
+                <Breadcrumbs
+                  separator={<ArrowForwardIosIcon fontSize="small" />}
+                  aria-label="breadcrumb"
                 >
-                  {loading ? ( 
+                  {breadcrumbs.map((breadcrumb, index) => (
+                    <span key={index}>{breadcrumb}</span>
+                  ))}
+                </Breadcrumbs>
+                <ChartExample
+                  selected={selectedNodeId}
+                  changePayload={handleAddRow}
+                  nodeId={selectedNodeId}
+                  text={nodeText}
+                  breadcrumbs={breadcrumbs}
+                  listItems={listItems}
+                  deleteRow={handleDeleteRow}
+                />
+                <Button variant="outlined" size="medium" onClick={handleSearch}>
+                  {loading ? (
                     <div className="d-flex align-items-center">
                       <span>Loading...</span>
-                      <Stack sx={{ color: 'black' }} >
-      
-                      <CircularProgress color="inherit"  size={20} className="ms-2" />
+                      <Stack sx={{ color: "black" }}>
+                        <CircularProgress
+                          color="inherit"
+                          size={20}
+                          className="ms-2"
+                        />
                       </Stack>
                     </div>
                   ) : (
                     <span>Search</span>
                   )}
-                </button>
-            </>
-          )}
+                </Button>
+              </>
+            )}
           </TabPanel>
 
           <TabPanel>
+            <div>
+              <span>Persons per page:</span>
+              <Select
+                value={personsPerPage}
+                onChange={(e) => {
+                  setPersonsPerPage(parseInt(e.target.value));
+                }}
+                sx={{
+                  borderRadius: "29px",
+                  minWidth: 95,
+                  marginLeft: "10px",
+                  paddingTop: "2px",
+                  paddingBottom: "2px",
+                  paddingLeft: "8px",
+                  paddingRight: "8px",
+                  width: "100px",
+                  height: "31px",
+                }}
+              >
+                {personsPerPageOptions.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </Select>
+            </div>
             <div className="person-search">
               <div className="image-div">
-                <div className="col-sm-9">
+                <div className="col-sm-12">
                   {searched ? (
-                <TableContainer>
-                <Table>
-                  {renderTableHeader()}
-                  {renderTableRows()}
-                </Table>
-              </TableContainer>
+                    <TableContainer>
+                      <Table>
+                        {renderTableHeader()}
+                        <TableBody>
+                          {users.map((user) => {
+                            const imageUrl = `http://localhost:8080/getImageByApplicationNumberId/${user.applicationNumber}/P`;
+
+                            return (
+                              <TableRow key={user.pin}>
+                                <TableCell>{user.pin}</TableCell>
+                                <TableCell>{user.applicationNumber}</TableCell>
+                                <TableCell>{user.birthDate}</TableCell>
+                                <TableCell>{user.countrecord}</TableCell>
+                                <TableCell className="image">
+                                  <Fancybox
+                                    options={{
+                                      Carousel: {
+                                        infinite: false,
+                                      },
+                                    }}
+                                  >
+                                    <a
+                                      data-fancybox="gallery"
+                                      href={imageUrl}
+                                    >
+                                      <img
+                                        src={imageUrl}
+                                        width="200"
+                                        height="150"
+                                      />
+                                    </a>
+                                  </Fancybox>
+                                  {/* <img src={imageUrl} alt="Person" className="img-thumbnail" /> */}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
                   ) : (
                     <p>No search results yet.</p>
                   )}
-
-                  <div>
-                    <span>Persons per page:</span>
-                    <Select
-                      value={personsPerPage}
-                      onChange={(e) =>
-                        setPersonsPerPage(parseInt(e.target.value))
-                      }
-                      sx={{
-                        borderRadius: "29px",
-                        minWidth: 95,
-                        marginLeft: "10px",
-                        paddingTop: "2px",
-                        paddingBottom: "2px",
-                        paddingLeft: "8px",
-                        paddingRight: "8px",
-                        width: "100px",
-                        height: "31px",
+                  {searched ? (
+                    <Pagination
+                      count={totalPages}
+                      page={page}
+                      onChange={handlePageChange}
+                      color="primary"
+                      size="small"
+                      className="pagination"
+                      boundaryCount={2}
+                      showFirstButton
+                      showLastButton
+                      siblingCount={2}
+                      renderItem={(item) => (
+                        <PaginationItem
+                          component={Button}
+                          {...item}
+                          disabled={loading}
+                          onClick={() => {
+                            setPage(item.page);
+                            handlePageChange(item.page);
+                          }}
+                        />
+                      )}
+                      nextIconButtonProps={{
+                        size: "small",
+                        disabled: page === totalPages || loading,
                       }}
-                    >
-                      {personsPerPageOptions.map((option) => (
-                        <MenuItem key={option} value={option}>
-                          {option}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </div>
-
-                  <Pagination
-                    count={totalPages}
-                    page={page}
-                    onChange={(event, value) => setPage(value)}
-                    color="primary"
-                    size="small"
-                    className="pagination"
-                  />
+                      previousIconButtonProps={{
+                        size: "small",
+                        disabled: page === 1 || loading,
+                      }}
+                      nextIcon={<KeyboardArrowRight />}
+                      prevIcon={<KeyboardArrowLeft />}
+                    />
+                  ) : (
+                    <p></p>
+                  )}
                 </div>
               </div>
             </div>
@@ -323,7 +371,6 @@ function TreeComponent() {
         </Tabs>
       </div>
     </div>
-    
   );
 }
 

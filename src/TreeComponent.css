@@ -90,7 +90,7 @@
     margin-right: calc(-.5 * var(--bs-gutter-x));
     
 
-    margin-left: 80px;
+   
   }
   .pagination {
     display: flex;
@@ -149,5 +149,6 @@
     left: 10px;
     z-index: 9999;
   }
+  .image img{width:100%;cursor: pointer}
   
   
