@@ -61,7 +61,7 @@ function TreeComponent() {
     };
   }, []);
   useEffect(() => {
-    if (!initialLoad) {
+    if (!initialLoad && searched) {
       fetchSearchResults();
     } else {
       setInitialLoad(false);
@@ -191,16 +191,17 @@ function TreeComponent() {
     );
   };
 
-  return (
+  return (<>
+
     <div className="container">
-      <div className="left-column">
+      <div className="left-column ">
         <div id="feature-tree"></div>
       </div>
 
       {/* <div style={{ position: "absolute", top: 0, left: 0 }}>
   <img src={faceIcon} alt="Face Icon" />
 </div> */}
-      <div className="right-column">
+      <div className="right-column ">
         <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
           <TabList className="custom-tab-list">
             <Tab className="custom-tab-list-item">
@@ -260,6 +261,7 @@ function TreeComponent() {
                 value={personsPerPage}
                 onChange={(e) => {
                   setPersonsPerPage(parseInt(e.target.value));
+                  setPage(1);
                 }}
                 sx={{
                   borderRadius: "29px",
@@ -302,6 +304,7 @@ function TreeComponent() {
                                     options={{
                                       Carousel: {
                                         infinite: false,
+                                        fullscreen:false,
                                       },
                                     }}
                                   >
@@ -371,6 +374,7 @@ function TreeComponent() {
         </Tabs>
       </div>
     </div>
+      </>
   );
 }
 

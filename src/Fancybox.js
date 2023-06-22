@@ -11,7 +11,9 @@ function Fancybox(props) {
 
     const delegate = props.delegate || "[data-fancybox]";
     const options = props.options || {};
-
+    options.fullscreen = false;
+    options.modal = true; // Enable modal mode
+    options.baseClass = "fancybox-custom"; // Set custom baseClass
     NativeFancybox.bind(container, delegate, options);
 
     return () => {
