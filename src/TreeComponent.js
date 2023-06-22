@@ -202,18 +202,19 @@ function TreeComponent() {
   };
 
   return (<>
+        <section className="jumbotron text-center" style={{backgroundColor:"#38516c",fontSize:24,fontWeight:"bold",padding:"15px 0",color:"white",boxShadow:" 0px 1px 15px black"}}>Face Future Search System</section>
+    <div className="container" style={{marginTop:0}}>
 
-    <div className="container">
-      <div className="left-column ">
-        <div id="feature-tree"></div>
+      <div className="left-column "  style={{boxShadow:" 0px 1px 5px black",borderRadius:"0 !important"}}>
+        <div id="feature-tree" ></div>
       </div>
 
       {/* <div style={{ position: "absolute", top: 0, left: 0 }}>
   <img src={faceIcon} alt="Face Icon" />
 </div> */}
       <div className="right-column ">
-        <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
-          <TabList className="custom-tab-list">
+        <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}  style={{boxShadow:" 0px 1px 5px black"}}>
+          <TabList className="custom-tab-list" >
             <Tab className="custom-tab-list-item">
               <span>Selected Node</span>
               <TouchAppIcon />
@@ -224,7 +225,7 @@ function TreeComponent() {
             </Tab>
           </TabList>
 
-          <TabPanel>
+          <TabPanel style={{padding:"20px"}}>
             {selectedNodeId !== null && (
               <>
                 <Breadcrumbs
@@ -264,7 +265,7 @@ function TreeComponent() {
             )}
           </TabPanel>
 
-          <TabPanel>
+          <TabPanel style={{padding:"20px"}}>
             <div>
               <span>Persons per page:</span>
               <Select

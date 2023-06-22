@@ -40,6 +40,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
+
   height: 100vh;
 }
 
@@ -48,10 +49,6 @@
   padding: 20px;
 }
 
-.right-column {
-  flex: 1;
-  padding: 20px;
-}
 
 #feature-tree {
   height: calc(100% - 40px); /* Adjust the height to fit the available space */
