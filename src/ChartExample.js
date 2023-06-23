@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import ReactEcharts from "echarts-for-react";
 import Service from "./service";
 import axios from "axios";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 import {
   Input,
@@ -180,10 +181,11 @@ const ChartExample = (props) => {
         onChange={(val) => {
           setExampleValueMax(val.target.value);
         }}
+        style={{marginLeft:"10px"}}
         
       />
     
-      <Button onClick={handleAddRow} variant="outlined" color="success" size="small">
+      <Button onClick={handleAddRow} variant="contained" color="success" size="small" style={{marginLeft:"10px",borderRadius:0}}>
         Add
       </Button>
      
@@ -212,7 +214,8 @@ const ChartExample = (props) => {
               variant="outlined"
               color="error"
               size="small"
-              startIcon={<ClearIcon />}
+              startIcon={<DeleteForeverIcon />}
+              style={{borderRadius:0}}
             >
               DELETE
             </Button>

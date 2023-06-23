@@ -245,7 +245,7 @@ function TreeComponent() {
                   listItems={listItems}
                   deleteRow={handleDeleteRow}
                 />
-                <Button variant="outlined" size="medium" onClick={handleSearch}>
+                <Button variant="contained" size="medium" onClick={handleSearch}  disabled={listItems === 'undefined' || listItems.length === 0 } style={{marginTop:"10px",borderRadius:0}}>
                   {loading ? (
                     <div className="d-flex align-items-center">
                       <span>Loading...</span>
